@@ -1,0 +1,133 @@
+{% extends "base.html" %} {% block title %}Search Items - Smart Lost & Found{%
+endblock %} {% block content %}
+
+<section class="search-section">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">SEARCH ITEMS</p>
+      <h1>Find a Lost or Found Item</h1>
+      <p>
+        Search through reported items using keywords, category, type and
+        location.
+      </p>
+    </div>
+
+    <form class="search-form" method="GET" action="{{ url_for('search') }}">
+      <div class="search-input">
+        <span>🔍</span>
+
+        <input
+          type="text"
+          name="q"
+          placeholder="Search item name or description..."
+          value="{{ keyword }}"
+        />
+      </div>
+
+      <select name="category">
+        <option value="">All Categories</option>
+
+        <option value="Electronics">Electronics</option>
+
+        <option value="Documents">Documents</option>
+
+        <option value="Wallet">Wallet</option>
+
+        <option value="Keys">Keys</option>
+
+        <option value="Bag">Bag</option>
+
+        <option value="Other">Other</option>
+      </select>
+
+      <select name="type">
+        <option value="">Lost & Found</option>
+
+        <option value="Lost">Lost</option>
+
+        <option value="Found">Found</option>
+      </select>
+
+      <input
+        type="text"
+        name="location"
+        placeholder="Location"
+        value="{{ location }}"
+        class="search-location"
+      />
+
+      <button type="submit" class="btn btn-primary">🔍 Search</button>
+    </form>
+  </div>
+</section>
+
+<section class="recent-items">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">RESULTS</p>
+
+      <h2>
+        {% if results %} {{ results|length }} Item(s) Found {% else %} No Items
+        Found {% endif %}
+      </h2>
+    </div>
+
+    <div class="item-grid">
+      {% if results %} {% for item in results %}
+
+      <article class="item-card">
+        <div class="item-image">
+          {% if item.image %}
+
+          <img
+            src="{{ url_for('static', filename='uploads/' + item.image) }}"
+            alt="{{ item.name }}"
+            loading="lazy"
+          />
+
+          {% else %}
+
+          <div class="no-image">📦</div>
+
+          {% endif %}
+        </div>
+
+        <div class="item-details">
+          {% if item.item_type == "Lost" %}
+
+          <span class="status-badge status-lost"> Lost </span>
+
+          {% else %}
+
+          <span class="status-badge status-found"> Found </span>
+
+          {% endif %}
+
+          <h3>{{ item.name }}</h3>
+
+          <p>{{ item.description }}</p>
+
+          <div class="item-location">🏷️ {{ item.category }}</div>
+
+          <div class="item-location">📍 {{ item.location }}</div>
+
+          <div class="item-location">📅 {{ item.date }}</div>
+        </div>
+      </article>
+
+      {% endfor %} {% else %}
+
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+
+        <h3>No matching items found</h3>
+
+        <p>Try changing your keyword, category, type or location.</p>
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

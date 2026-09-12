@@ -1,0 +1,141 @@
+{% extends "base.html" %} {% block title %}Report Lost Item - Smart Lost &
+Found{% endblock %} {% block content %}
+
+<section class="report-section">
+  <div class="container report-container">
+    <!-- PAGE HEADER -->
+    <div class="report-header">
+      <p class="eyebrow">REPORT ITEM</p>
+
+      <h1>Report Lost Item</h1>
+
+      <p>
+        Provide the details of your lost item so that others can help you find
+        it.
+      </p>
+    </div>
+
+    <!-- REPORT FORM -->
+    <form
+      class="report-form"
+      method="POST"
+      action="{{ url_for('report_lost') }}"
+      enctype="multipart/form-data"
+    >
+      <!-- ITEM NAME -->
+      <div class="form-group">
+        <label for="name">Item Name</label>
+
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="e.g. Smartphone, Wallet, Backpack"
+          required
+        />
+      </div>
+
+      <!-- CATEGORY -->
+      <div class="form-group">
+        <label for="category">Category</label>
+
+        <select id="category" name="category" required>
+          <option value="">Select Category</option>
+          <option value="electronics">Electronics</option>
+          <option value="documents">Documents</option>
+          <option value="wallet">Wallet</option>
+          <option value="bags">Bags</option>
+          <option value="keys">Keys</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <!-- OTHER CATEGORY -->
+      <div id="other-category-box" class="form-group" style="display: none">
+        <label for="other_category"> Specify Category </label>
+
+        <input
+          type="text"
+          id="other_category"
+          name="other_category"
+          placeholder="Enter your item category"
+        />
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="form-group">
+        <label for="description"> Description </label>
+
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Describe your lost item, its color, brand, special marks, etc."
+          required
+        ></textarea>
+
+        <span class="form-help">
+          Add useful details that can help identify your item.
+        </span>
+      </div>
+
+      <!-- IMAGE -->
+      <div class="form-group">
+        <label for="image"> Item Image </label>
+
+        <input type="file" id="image" name="image" accept="image/*" />
+
+        <span class="form-help"> Upload a clear photo of your lost item. </span>
+      </div>
+
+      <!-- LOCATION -->
+      <div class="form-group">
+        <label for="location"> Lost Location </label>
+
+        <input
+          type="text"
+          id="location"
+          name="location"
+          placeholder="e.g. College Campus, Library, Cafeteria"
+          required
+        />
+      </div>
+
+      <!-- DATE -->
+      <div class="form-group">
+        <label for="date"> Date Lost </label>
+
+        <input type="date" id="date" name="date" required />
+      </div>
+
+      <!-- CONTACT -->
+      <div class="form-group">
+        <label for="contact"> Contact Information </label>
+
+        <input
+          type="text"
+          id="contact"
+          name="contact"
+          placeholder="Phone number or email"
+          required
+        />
+
+        <span class="form-help">
+          Provide a way for someone to contact you if your item is found.
+        </span>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-large">
+          Report Lost Item
+        </button>
+
+        <a href="{{ url_for('home') }}" class="btn btn-secondary btn-large">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

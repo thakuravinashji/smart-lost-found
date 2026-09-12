@@ -1,0 +1,192 @@
+{% extends "base.html" %} {% block title %} My Reports - Smart Lost & Found {%
+endblock %} {% block content %}
+
+<section class="recent-items">
+  <div class="container">
+    <!-- =====================================================
+             PAGE HEADING
+        ====================================================== -->
+
+    <div class="section-heading">
+      <p class="eyebrow">MY REPORTS</p>
+
+      <h1>My Lost & Found Reports</h1>
+
+      <p>View all the items you have reported.</p>
+    </div>
+
+    <!-- =====================================================
+             ITEMS
+        ====================================================== -->
+
+    <div class="item-grid">
+      {% if my_items %} {% for item in my_items %}
+
+      <article class="item-card">
+        <!-- =================================================
+                             IMAGE
+                        ================================================== -->
+
+        <div class="item-image">
+          {% if item.image %}
+
+          <img
+            src="{{ url_for(
+                                        'static',
+                                        filename='uploads/' + item.image
+                                    ) }}"
+            alt="{{ item.name }}"
+            loading="lazy"
+          />
+
+          {% else %}
+
+          <div class="no-image">📦</div>
+
+          {% endif %}
+        </div>
+
+        <!-- =================================================
+                             DETAILS
+                        ================================================== -->
+
+        <div class="item-details">
+          <!-- STATUS -->
+
+          {% if item.item_type == "Lost" %}
+
+          <span class="status-badge status-lost"> Lost </span>
+
+          {% else %}
+
+          <span class="status-badge status-found"> Found </span>
+
+          {% endif %}
+
+          <!-- NAME -->
+
+          <h3>{{ item.name }}</h3>
+
+          <!-- DESCRIPTION -->
+
+          <p>{{ item.description }}</p>
+
+          <!-- CATEGORY -->
+
+          <div class="item-location">🏷️ {{ item.category }}</div>
+
+          <!-- LOCATION -->
+
+          <div class="item-location">📍 {{ item.location }}</div>
+
+          <!-- DATE -->
+
+          <div class="item-location">📅 {{ item.date }}</div>
+
+          <!-- =================================================
+                                 ACTION BUTTONS
+                            ================================================== -->
+
+          <div
+            class="item-actions"
+            style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap"
+          >
+            <!-- =================================================
+                                     LOST ITEM
+                                ================================================== -->
+
+            {% if item.item_type == "Lost" %}
+
+            <a
+              href="{{ url_for(
+                                            'matches',
+                                            item_id=item.id
+                                        ) }}"
+              class="btn btn-primary"
+            >
+              🎯 Find Matches
+            </a>
+
+            <!-- =================================================
+                                         APPROVED CLAIM
+                                    ================================================== -->
+
+            {% if item.id in approved_claims %}
+
+            <a
+              href="{{ url_for(
+                                                'contact_found_person',
+                                                claim_id=approved_claims[item.id].id
+                                            ) }}"
+              class="btn btn-primary"
+            >
+              📞 Contact Found Person
+            </a>
+
+            {% endif %}
+
+            <!-- =================================================
+                                     FOUND ITEM
+                                ================================================== -->
+
+            {% else %}
+
+            <a
+              href="{{ url_for(
+                                            'view_claims',
+                                            item_id=item.id
+                                        ) }}"
+              class="btn btn-primary"
+            >
+              📋 View Claims
+            </a>
+
+            {% endif %}
+          </div>
+
+          <!-- =================================================
+                                 APPROVED CLAIM MESSAGE
+                            ================================================== -->
+
+          {% if item.item_type == "Lost" and item.id in approved_claims %}
+
+          <div
+            style="
+              margin-top: 15px;
+              padding: 12px;
+              border-radius: 10px;
+              background: #ecfdf5;
+              border: 1px solid #bbf7d0;
+            "
+          >
+            <strong> ✅ Your claim has been approved! </strong>
+
+            <p style="margin-top: 5px">
+              You can now contact the person who found your item.
+            </p>
+          </div>
+
+          {% endif %}
+        </div>
+      </article>
+
+      {% endfor %} {% else %}
+
+      <!-- =====================================================
+                     EMPTY STATE
+                ====================================================== -->
+
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+
+        <h3>No reports yet</h3>
+
+        <p>You haven't reported any lost or found items yet.</p>
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

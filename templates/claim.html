@@ -1,0 +1,124 @@
+{% extends "base.html" %} {% block title %}Claim Item - Smart Lost & Found{%
+endblock %} {% block content %}
+
+<section class="report-section">
+  <div class="container report-container">
+    <!-- HEADER -->
+    <div class="report-header">
+      <p class="eyebrow">CLAIM ITEM</p>
+
+      <h1>Claim Found Item</h1>
+
+      <p>Select your lost item that matches this found item.</p>
+    </div>
+
+    <!-- FOUND ITEM -->
+    <div class="card" style="margin-bottom: 30px">
+      <div class="card-content">
+        <h2>{{ found_item.name }}</h2>
+
+        {% if found_item.image %}
+        <img
+          src="{{ url_for('static', filename='uploads/' + found_item.image) }}"
+          alt="{{ found_item.name }}"
+          style="
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 15px 0;
+          "
+        />
+        {% endif %}
+
+        <p>
+          <strong>Category:</strong>
+          {{ found_item.category }}
+        </p>
+
+        <p>
+          <strong>Location Found:</strong>
+          {{ found_item.location }}
+        </p>
+
+        <p>
+          <strong>Date Found:</strong>
+          {{ found_item.date }}
+        </p>
+
+        <p>
+          <strong>Description:</strong>
+          {{ found_item.description }}
+        </p>
+      </div>
+    </div>
+
+    <!-- CLAIM FORM -->
+    <form
+      class="report-form"
+      method="POST"
+      action="{{ url_for('claim_item', item_id=found_item.id) }}"
+    >
+      <!-- SELECT LOST ITEM -->
+      <div class="form-group">
+        <label for="lost_item_id"> Select Your Lost Item </label>
+
+        {% if lost_items %}
+
+        <select id="lost_item_id" name="lost_item_id" required>
+          <option value="">Select your lost item</option>
+
+          {% for item in lost_items %}
+
+          <option value="{{ item.id }}">
+            {{ item.name }} — {{ item.category }} — {{ item.location }}
+          </option>
+
+          {% endfor %}
+        </select>
+
+        {% else %}
+
+        <p class="form-help">You don't have any lost items reported yet.</p>
+
+        {% endif %}
+      </div>
+
+      <!-- MESSAGE -->
+      <div class="form-group">
+        <label for="message"> Why do you believe this is your item? </label>
+
+        <textarea
+          id="message"
+          name="message"
+          placeholder="Provide details that can help verify your ownership..."
+          rows="5"
+          required
+        ></textarea>
+
+        <span class="form-help">
+          Mention unique details such as color, marks, stickers, model,
+          contents, etc.
+        </span>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="form-actions">
+        {% if lost_items %}
+
+        <button type="submit" class="btn btn-primary btn-large">
+          Submit Claim
+        </button>
+
+        {% endif %}
+
+        <a href="{{ url_for('search') }}" class="btn btn-secondary btn-large">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

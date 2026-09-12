@@ -1,0 +1,299 @@
+{% extends "base.html" %} {% block title %}Claims - Smart Lost & Found{%
+endblock %} {% block content %}
+
+<section class="recent-items">
+  <div class="container">
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="section-heading">
+      <p class="eyebrow">CLAIM MANAGEMENT</p>
+
+      <h1>Claims for {{ item.name }}</h1>
+
+      <p>Review and manage claims submitted for your found item.</p>
+    </div>
+
+    <!-- =====================================================
+         FOUND ITEM INFORMATION
+    ====================================================== -->
+
+    <article class="item-card">
+      <!-- IMAGE -->
+
+      <div class="item-image">
+        {% if item.image %}
+
+        <img
+          src="{{ url_for('static', filename='uploads/' + item.image) }}"
+          alt="{{ item.name }}"
+          loading="lazy"
+        />
+
+        {% else %}
+
+        <div class="no-image">📦</div>
+
+        {% endif %}
+      </div>
+
+      <!-- DETAILS -->
+
+      <div class="item-details">
+        <span class="status-badge status-found"> Found </span>
+
+        <h3>{{ item.name }}</h3>
+
+        <p>{{ item.description }}</p>
+
+        <div class="item-location">🏷️ {{ item.category }}</div>
+
+        <div class="item-location">📍 {{ item.location }}</div>
+
+        <div class="item-location">📅 {{ item.date }}</div>
+      </div>
+    </article>
+
+    <!-- =====================================================
+         CLAIMS HEADER
+    ====================================================== -->
+
+    <div style="margin-top: 40px">
+      <div class="section-heading">
+        <p class="eyebrow">SUBMITTED CLAIMS</p>
+
+        <h2>
+          {% if claims %} {{ claims|length }} Claim(s) {% else %} No Claims {%
+          endif %}
+        </h2>
+      </div>
+
+      <!-- =====================================================
+           CLAIM LIST
+      ====================================================== -->
+
+      {% if claims %}
+
+      <div class="item-grid">
+        {% for claim in claims %}
+
+        <article class="item-card">
+          <div class="item-details">
+            <!-- =================================================
+                 CLAIM NUMBER
+            ================================================== -->
+
+            <span class="status-badge"> Claim #{{ claim.id }} </span>
+
+            <!-- =================================================
+                 CLAIMANT INFORMATION
+            ================================================== -->
+
+            <h3>👤 {{ claim.claimant.name }}</h3>
+
+            <p>📧 {{ claim.claimant.email }}</p>
+
+            <!-- =================================================
+                 LOST ITEM INFORMATION
+            ================================================== -->
+
+            <div class="item-location">
+              🔎 Lost Item:
+
+              <strong> {{ claim.lost_item.name }} </strong>
+            </div>
+
+            <div class="item-location">🏷️ {{ claim.lost_item.category }}</div>
+
+            <div class="item-location">📍 {{ claim.lost_item.location }}</div>
+
+            <div class="item-location">📅 {{ claim.lost_item.date }}</div>
+
+            <!-- =================================================
+                 CLAIM MESSAGE
+            ================================================== -->
+
+            {% if claim.message %}
+
+            <div
+              style="
+                margin-top: 15px;
+                padding: 15px;
+                border-radius: 10px;
+                background: #f5f5f5;
+              "
+            >
+              <strong> 💬 Claim Message </strong>
+
+              <p style="margin-top: 8px">{{ claim.message }}</p>
+            </div>
+
+            {% endif %}
+
+            <!-- =================================================
+                 CLAIM STATUS
+            ================================================== -->
+
+            <div style="margin-top: 20px">
+              {% if claim.status|lower == "pending" %}
+
+              <span class="status-badge"> ⏳ Pending </span>
+
+              {% elif claim.status|lower == "approved" %}
+
+              <span class="status-badge status-found"> ✓ Approved </span>
+
+              {% elif claim.status|lower == "rejected" %}
+
+              <span class="status-badge status-lost"> ✕ Rejected </span>
+
+              {% else %}
+
+              <span class="status-badge"> {{ claim.status }} </span>
+
+              {% endif %}
+            </div>
+
+            <!-- =================================================
+                 APPROVE / REJECT BUTTONS
+            ================================================== -->
+
+            {% if claim.status|lower == "pending" %}
+
+            <div
+              style="
+                display: flex;
+                gap: 10px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+              "
+            >
+              <!-- APPROVE CLAIM -->
+
+              <form
+                method="POST"
+                action="{{ url_for(
+                  'update_claim_status',
+                  claim_id=claim.id,
+                  action='approve'
+                ) }}"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  onclick="
+                    return confirm(
+                      'Are you sure you want to approve this claim?',
+                    );
+                  "
+                >
+                  ✓ Approve Claim
+                </button>
+              </form>
+
+              <!-- REJECT CLAIM -->
+
+              <form
+                method="POST"
+                action="{{ url_for(
+                  'update_claim_status',
+                  claim_id=claim.id,
+                  action='reject'
+                ) }}"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-secondary"
+                  onclick="
+                    return confirm(
+                      'Are you sure you want to reject this claim?',
+                    );
+                  "
+                >
+                  ✕ Reject Claim
+                </button>
+              </form>
+            </div>
+
+            {% endif %}
+
+            <!-- =================================================
+                 APPROVED MESSAGE
+            ================================================== -->
+
+            {% if claim.status|lower == "approved" %}
+
+            <div
+              style="
+                margin-top: 15px;
+                padding: 12px;
+                border-radius: 8px;
+                background: #f0fdf4;
+              "
+            >
+              <strong> ✅ Claim Approved </strong>
+
+              <p style="margin-top: 5px">
+                Please contact the claimant to arrange the return of the item.
+              </p>
+            </div>
+
+            {% endif %}
+
+            <!-- =================================================
+                 REJECTED MESSAGE
+            ================================================== -->
+
+            {% if claim.status|lower == "rejected" %}
+
+            <div
+              style="
+                margin-top: 15px;
+                padding: 12px;
+                border-radius: 8px;
+                background: #fef2f2;
+              "
+            >
+              <strong> ❌ Claim Rejected </strong>
+
+              <p style="margin-top: 5px">This claim has been rejected.</p>
+            </div>
+
+            {% endif %}
+          </div>
+        </article>
+
+        {% endfor %}
+      </div>
+
+      <!-- =====================================================
+           NO CLAIMS
+      ====================================================== -->
+
+      {% else %}
+
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+
+        <h3>No claims yet</h3>
+
+        <p>No one has submitted a claim for this found item yet.</p>
+      </div>
+
+      {% endif %}
+    </div>
+
+    <!-- =====================================================
+         BACK BUTTON
+    ====================================================== -->
+
+    <div style="margin-top: 30px">
+      <a href="{{ url_for('my_reports') }}" class="btn btn-secondary">
+        ← Back to My Reports
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

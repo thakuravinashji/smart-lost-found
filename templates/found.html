@@ -1,0 +1,173 @@
+{% extends "base.html" %} {% block title %} Report Found Item - Smart Lost &
+Found {% endblock %} {% block content %}
+
+<section class="report-section">
+  <div class="container report-container">
+    <!-- HEADER -->
+
+    <div class="report-header">
+      <p class="eyebrow">FOUND ITEM</p>
+
+      <h1>Report a Found Item</h1>
+
+      <p>Help someone recover their lost item by providing accurate details.</p>
+    </div>
+
+    <!-- FORM -->
+
+    <form
+      class="report-form"
+      method="POST"
+      action="{{ url_for('report_found') }}"
+      enctype="multipart/form-data"
+    >
+      <!-- ITEM NAME -->
+
+      <div class="form-group">
+        <label for="name"> Item Name </label>
+
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="e.g. Smartphone, Wallet, Backpack"
+          required
+        />
+      </div>
+
+      <!-- CATEGORY -->
+
+      <div class="form-group">
+        <label for="category"> Category </label>
+
+        <select id="category" name="category" required>
+          <option value="">Select Category</option>
+
+          <option value="electronics">Electronics</option>
+
+          <option value="documents">Documents</option>
+
+          <option value="wallet">Wallet</option>
+
+          <option value="bags">Bags</option>
+
+          <option value="keys">Keys</option>
+
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <!-- OTHER CATEGORY -->
+
+      <div id="other-category-box" class="form-group hidden">
+        <label for="other_category"> Specify Category </label>
+
+        <input
+          type="text"
+          id="other_category"
+          name="other_category"
+          placeholder="Enter category"
+        />
+      </div>
+
+      <!-- DESCRIPTION -->
+
+      <div class="form-group">
+        <label for="description"> Description </label>
+
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Describe the item..."
+          required
+        ></textarea>
+
+        <span class="form-help">
+          Add useful details that can help identify the item.
+        </span>
+      </div>
+
+      <!-- IMAGE -->
+
+      <div class="form-group">
+        <label for="image"> Item Image </label>
+
+        <input type="file" id="image" name="image" accept="image/*" />
+
+        <span class="form-help"> Upload a clear photo of the found item. </span>
+      </div>
+
+      <!-- LOCATION -->
+
+      <div class="form-group">
+        <label for="location"> Found Location </label>
+
+        <input
+          type="text"
+          id="location"
+          name="location"
+          placeholder="e.g. College Library"
+          required
+        />
+      </div>
+
+      <!-- DATE -->
+
+      <div class="form-group">
+        <label for="date"> Date Found </label>
+
+        <input type="date" id="date" name="date" required />
+      </div>
+
+      <!-- CONTACT -->
+
+      <div class="form-group">
+        <label for="contact"> Contact Information </label>
+
+        <input
+          type="text"
+          id="contact"
+          name="contact"
+          placeholder="Email or phone number"
+          required
+        />
+
+        <span class="form-help">
+          Provide a way for someone to contact you.
+        </span>
+      </div>
+
+      <!-- BUTTONS -->
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-large">
+          Report Found Item
+        </button>
+
+        <a href="{{ url_for('home') }}" class="btn btn-secondary btn-large">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</section>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const category = document.getElementById("category");
+    const otherCategoryBox = document.getElementById("other-category-box");
+    const otherCategoryInput = document.getElementById("other_category");
+
+    category.addEventListener("change", function () {
+      if (this.value.toLowerCase() === "other") {
+        otherCategoryBox.classList.remove("hidden");
+        otherCategoryInput.required = true;
+      } else {
+        otherCategoryBox.classList.add("hidden");
+        otherCategoryInput.required = false;
+        otherCategoryInput.value = "";
+      }
+    });
+  });
+</script>
+
+{% endblock %}

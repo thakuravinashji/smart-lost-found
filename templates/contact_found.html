@@ -1,0 +1,220 @@
+{% extends "base.html" %} {% block title %} Contact Found Person - Smart Lost &
+Found {% endblock %} {% block content %}
+
+<section class="recent-items">
+  <div class="container">
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="section-heading">
+      <p class="eyebrow">ITEM RETURN</p>
+
+      <h1>Contact Found Person</h1>
+
+      <p>
+        Your claim has been approved. You can now contact the person who found
+        your item.
+      </p>
+    </div>
+
+    <!-- =====================================================
+         APPROVED MESSAGE
+    ====================================================== -->
+
+    <div
+      style="
+        margin-bottom: 25px;
+        padding: 18px;
+        border-radius: 12px;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+      "
+    >
+      <h3>✅ Claim Approved</h3>
+
+      <p style="margin-top: 8px">
+        Please coordinate with the found person to arrange the safe return of
+        your item.
+      </p>
+    </div>
+
+    <!-- =====================================================
+         FOUND ITEM
+    ====================================================== -->
+
+    <article class="item-card">
+      <div class="item-image">
+        {% if found_item.image %}
+
+        <img
+          src="{{ url_for(
+              'static',
+              filename='uploads/' + found_item.image
+          ) }}"
+          alt="{{ found_item.name }}"
+        />
+
+        {% else %}
+
+        <div class="no-image">📦</div>
+
+        {% endif %}
+      </div>
+
+      <div class="item-details">
+        <span class="status-badge status-found"> Found Item </span>
+
+        <h3>{{ found_item.name }}</h3>
+
+        <div class="item-location">🏷️ {{ found_item.category }}</div>
+
+        <div class="item-location">📍 {{ found_item.location }}</div>
+
+        <div class="item-location">📅 {{ found_item.date }}</div>
+      </div>
+    </article>
+
+    <!-- =====================================================
+         FOUND PERSON CONTACT
+    ====================================================== -->
+
+    <div style="margin-top: 35px">
+      <div class="section-heading">
+        <p class="eyebrow">FOUND PERSON</p>
+
+        <h2>Contact Details</h2>
+      </div>
+
+      <article class="item-card">
+        <div class="item-details">
+          <!-- =================================================
+               NAME
+          ================================================== -->
+
+          <h3>👤 {{ found_user.name }}</h3>
+
+          <!-- =================================================
+               EMAIL
+          ================================================== -->
+
+          <div
+            style="
+              margin-top: 15px;
+              padding: 12px;
+              border-radius: 10px;
+              background: #f8fafc;
+            "
+          >
+            <strong> 📧 Email </strong>
+
+            <p style="margin-top: 5px">{{ found_user.email }}</p>
+          </div>
+
+          <!-- =================================================
+               PHONE
+          ================================================== -->
+
+          {% if found_item.contact %}
+
+          <div
+            style="
+              margin-top: 12px;
+              padding: 12px;
+              border-radius: 10px;
+              background: #f8fafc;
+            "
+          >
+            <strong> 📞 Phone </strong>
+
+            <p style="margin-top: 5px">{{ found_item.contact }}</p>
+          </div>
+
+          {% else %}
+
+          <div
+            style="
+              margin-top: 12px;
+              padding: 12px;
+              border-radius: 10px;
+              background: #fff7ed;
+              border: 1px solid #fed7aa;
+            "
+          >
+            <strong> 📞 Phone </strong>
+
+            <p style="margin-top: 5px">Phone number has not been provided.</p>
+          </div>
+
+          {% endif %}
+
+          <!-- =================================================
+               CONTACT BUTTONS
+          ================================================== -->
+
+          <div
+            style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap"
+          >
+            <!-- EMAIL -->
+
+            <a href="mailto:{{ found_user.email }}" class="btn btn-primary">
+              📧 Send Email
+            </a>
+
+            <!-- PHONE -->
+
+            {% if found_item.contact %}
+
+            <a href="tel:{{ found_item.contact }}" class="btn btn-secondary">
+              📞 Call
+            </a>
+
+            {% endif %}
+
+            <!-- IN-APP MESSAGE -->
+
+            <a
+              href="{{ url_for('messages', claim_id=claim.id) }}"
+              class="btn btn-primary"
+            >
+              💬 Send Message
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- =====================================================
+         ITEM RETURN INFORMATION
+    ====================================================== -->
+
+    <div
+      style="
+        margin-top: 25px;
+        padding: 15px;
+        border-radius: 10px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+      "
+    >
+      <strong> 📦 Item Return </strong>
+
+      <p style="margin-top: 7px">
+        Please coordinate with the found person and arrange a safe place and
+        suitable time to return your item.
+      </p>
+    </div>
+
+    <!-- =====================================================
+         BACK
+    ====================================================== -->
+
+    <div style="margin-top: 30px">
+      <a href="{{ url_for('my_reports') }}" class="btn btn-secondary">
+        ← Back to My Reports
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

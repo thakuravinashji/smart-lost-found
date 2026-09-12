@@ -1,0 +1,368 @@
+{% extends "base.html" %} {% block title %} Notifications - Smart Lost & Found
+{% endblock %} {% block content %}
+
+<section class="recent-items">
+  <div class="container">
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="section-heading">
+      <p class="eyebrow">UPDATES</p>
+
+      <h1>🔔 Notifications</h1>
+
+      <p>
+        Stay updated about your matches, claims, approvals, rejections and
+        messages.
+      </p>
+    </div>
+
+    <!-- =====================================================
+         MARK ALL AS READ
+    ====================================================== -->
+
+    {% if notifications %}
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px">
+      <form method="POST" action="{{ url_for('mark_all_notifications_read') }}">
+        <button type="submit" class="btn btn-secondary">
+          ✓ Mark All as Read
+        </button>
+      </form>
+    </div>
+
+    {% endif %}
+
+    <!-- =====================================================
+         NOTIFICATIONS
+    ====================================================== -->
+
+    {% if notifications %}
+
+    <div style="display: flex; flex-direction: column; gap: 15px">
+      {% for notification in notifications %}
+
+      <article
+        style="
+          padding: 20px;
+          border-radius: 14px;
+
+          {% if not notification.is_read %}
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+          {% else %}
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+          {% endif %}
+
+          box-shadow:
+            0 4px 15px
+            rgba(15, 23, 42, 0.05);
+        "
+      >
+        <!-- =================================================
+             TOP
+        ================================================== -->
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+          "
+        >
+          <!-- =================================================
+               LEFT
+          ================================================== -->
+
+          <div>
+            <!-- =================================================
+                 MATCH NOTIFICATION
+            ================================================== -->
+
+            {% if notification.type == "match" %}
+
+            <div
+              style="
+                font-size: 14px;
+                font-weight: 700;
+                color: #2563eb;
+                margin-bottom: 8px;
+              "
+            >
+              🎯 Possible Match Found
+            </div>
+
+            <!-- =================================================
+                 MESSAGE
+            ================================================== -->
+
+            {% elif notification.type == "message" %}
+
+            <div
+              style="
+                font-size: 14px;
+                font-weight: 700;
+                color: #2563eb;
+                margin-bottom: 8px;
+              "
+            >
+              💬 New Message
+            </div>
+
+            <!-- =================================================
+                 APPROVED
+            ================================================== -->
+
+            {% elif notification.type == "claim_approved" %}
+
+            <div
+              style="
+                font-size: 14px;
+                font-weight: 700;
+                color: #16a34a;
+                margin-bottom: 8px;
+              "
+            >
+              ✅ Claim Approved
+            </div>
+
+            <!-- =================================================
+                 REJECTED
+            ================================================== -->
+
+            {% elif notification.type == "claim_rejected" %}
+
+            <div
+              style="
+                font-size: 14px;
+                font-weight: 700;
+                color: #dc2626;
+                margin-bottom: 8px;
+              "
+            >
+              ❌ Claim Rejected
+            </div>
+
+            <!-- =================================================
+                 CLAIM
+            ================================================== -->
+
+            {% elif notification.type == "claim" %}
+
+            <div
+              style="
+                font-size: 14px;
+                font-weight: 700;
+                color: #7c3aed;
+                margin-bottom: 8px;
+              "
+            >
+              📩 New Claim
+            </div>
+
+            <!-- =================================================
+                 GENERAL
+            ================================================== -->
+
+            {% else %}
+
+            <div
+              style="
+                font-size: 14px;
+                font-weight: 700;
+                color: #64748b;
+                margin-bottom: 8px;
+              "
+            >
+              🔔 Notification
+            </div>
+
+            {% endif %}
+
+            <!-- =================================================
+                 ACTUAL MESSAGE
+            ================================================== -->
+
+            <div style="font-size: 15px; line-height: 1.6; color: #0f172a">
+              {{ notification.message }}
+            </div>
+
+            <!-- =================================================
+                 TIME
+            ================================================== -->
+
+            <div style="margin-top: 8px; font-size: 12px; color: #94a3b8">
+              🕒 {{ notification.created_at | ist }}
+            </div>
+          </div>
+
+          <!-- =================================================
+               UNREAD BADGE
+          ================================================== -->
+
+          {% if not notification.is_read %}
+
+          <span
+            style="
+              padding: 5px 10px;
+              border-radius: 20px;
+              background: #2563eb;
+              color: white;
+              font-size: 11px;
+              font-weight: 600;
+            "
+          >
+            NEW
+          </span>
+
+          {% endif %}
+        </div>
+
+        <!-- =================================================
+             ACTION BUTTONS
+        ================================================== -->
+
+        <div
+          style="margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap"
+        >
+          <!-- =================================================
+               MATCH NOTIFICATION
+          ================================================== -->
+
+          {% if notification.type == "match" %}
+
+          <a
+            href="{{ url_for(
+              'notification_match',
+              notification_id=notification.id
+            ) }}"
+            class="btn btn-primary"
+          >
+            🎯 View My Reports
+          </a>
+
+          <!-- =================================================
+               MESSAGE NOTIFICATION
+          ================================================== -->
+
+          {% elif notification.type == "message" and notification.claim_id %}
+
+          <a
+            href="{{ url_for(
+              'notification_message',
+              notification_id=notification.id
+            ) }}"
+            class="btn btn-primary"
+          >
+            💬 Reply / Open Chat
+          </a>
+
+          <!-- =================================================
+               CLAIM NOTIFICATION
+          ================================================== -->
+
+          {% elif notification.type == "claim" and notification.claim_id %}
+
+          <a
+            href="{{ url_for(
+              'notification_claim',
+              notification_id=notification.id
+            ) }}"
+            class="btn btn-primary"
+          >
+            👁️ View Claim
+          </a>
+
+          <!-- =================================================
+               APPROVED CLAIM
+          ================================================== -->
+
+          {% elif notification.type == "claim_approved" and
+          notification.claim_id %}
+
+          <a
+            href="{{ url_for(
+              'contact_found_person',
+              claim_id=notification.claim_id
+            ) }}"
+            class="btn btn-primary"
+          >
+            📞 Contact Found Person
+          </a>
+
+          <!-- =================================================
+               REJECTED CLAIM
+          ================================================== -->
+
+          {% elif notification.type == "claim_rejected" %}
+
+          <form
+            method="POST"
+            action="{{ url_for(
+              'mark_notification_read',
+              notification_id=notification.id
+            ) }}"
+          >
+            <button type="submit" class="btn btn-secondary">
+              ✓ Mark as Read
+            </button>
+          </form>
+
+          <!-- =================================================
+               GENERAL NOTIFICATION
+          ================================================== -->
+
+          {% else %} {% if not notification.is_read %}
+
+          <form
+            method="POST"
+            action="{{ url_for(
+                'mark_notification_read',
+                notification_id=notification.id
+              ) }}"
+          >
+            <button type="submit" class="btn btn-secondary">
+              ✓ Mark as Read
+            </button>
+          </form>
+
+          {% endif %} {% endif %}
+        </div>
+      </article>
+
+      {% endfor %}
+    </div>
+
+    <!-- =====================================================
+         EMPTY STATE
+    ====================================================== -->
+
+    {% else %}
+
+    <div
+      style="
+        text-align: center;
+        padding: 80px 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+      "
+    >
+      <div style="font-size: 50px">🔔</div>
+
+      <h2 style="margin-top: 15px">No Notifications</h2>
+
+      <p style="margin-top: 8px; color: #64748b">
+        You don't have any notifications yet.
+      </p>
+    </div>
+
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

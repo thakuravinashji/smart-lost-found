@@ -1,0 +1,154 @@
+{% extends "base.html" %} {% block title %} Smart Matches - Smart Lost & Found
+{% endblock %} {% block content %}
+
+<section class="search-section">
+  <div class="container">
+    <!-- =====================================================
+             PAGE HEADING
+        ====================================================== -->
+
+    <div class="section-heading">
+      <p class="eyebrow">SMART MATCHING</p>
+
+      <h1>Possible Matches</h1>
+
+      <p>We found these possible matches for your lost item.</p>
+    </div>
+
+    <!-- =====================================================
+             YOUR LOST ITEM
+        ====================================================== -->
+
+    <div class="card">
+      <div class="card-content">
+        <p class="eyebrow">YOUR LOST ITEM</p>
+
+        <h2>{{ lost_item.name }}</h2>
+
+        <p>{{ lost_item.description }}</p>
+
+        <div class="item-location">🏷️ {{ lost_item.category }}</div>
+
+        <div class="item-location">📍 {{ lost_item.location }}</div>
+
+        <div class="item-location">📅 {{ lost_item.date }}</div>
+      </div>
+    </div>
+
+    <!-- =====================================================
+             MATCH RESULTS HEADING
+        ====================================================== -->
+
+    <div class="section-heading">
+      <p class="eyebrow">MATCH RESULTS</p>
+
+      <h2>{{ matches|length }} Possible Match(es)</h2>
+    </div>
+
+    <!-- =====================================================
+             MATCH RESULTS
+        ====================================================== -->
+
+    {% if matches %}
+
+    <div class="item-grid">
+      {% for match in matches %}
+
+      <article class="item-card">
+        <!-- =================================================
+                     IMAGE
+                ================================================== -->
+
+        <div class="item-image">
+          {% if match.item.image %}
+
+          <img
+            src="{{ url_for(
+                            'static',
+                            filename='uploads/' + match.item.image
+                        ) }}"
+            alt="{{ match.item.name }}"
+            loading="lazy"
+          />
+
+          {% else %}
+
+          <div class="no-image" aria-label="No image available">📦</div>
+
+          {% endif %}
+        </div>
+
+        <!-- =================================================
+                     DETAILS
+                ================================================== -->
+
+        <div class="item-details">
+          <!-- MATCH SCORE -->
+
+          <span class="status-badge status-found">
+            🎯 {{ match.score }}% Match
+          </span>
+
+          <!-- ITEM NAME -->
+
+          <h3>{{ match.item.name }}</h3>
+
+          <!-- DESCRIPTION -->
+
+          <p>{{ match.item.description }}</p>
+
+          <!-- CATEGORY -->
+
+          <div class="item-location">🏷️ {{ match.item.category }}</div>
+
+          <!-- LOCATION -->
+
+          <div class="item-location">📍 {{ match.item.location }}</div>
+
+          <!-- DATE -->
+
+          <div class="item-location">📅 {{ match.item.date }}</div>
+
+          <!-- =================================================
+                         CLAIM BUTTON
+                    ================================================== -->
+
+          <div style="margin-top: 18px">
+            <a
+              href="{{ url_for(
+                                'claim_item',
+                                item_id=match.item.id
+                            ) }}"
+              class="btn btn-primary"
+            >
+              📋 Claim This Item
+            </a>
+          </div>
+        </div>
+      </article>
+
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <!-- =====================================================
+             NO MATCH
+        ====================================================== -->
+
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+
+      <h3>No Possible Matches Found</h3>
+
+      <p>
+        We couldn't find a matching found item yet. Check again later when new
+        items are reported.
+      </p>
+    </div>
+
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

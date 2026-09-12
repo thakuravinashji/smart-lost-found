@@ -1,0 +1,633 @@
+{% extends "base.html" %} {% block title %}Messages - Smart Lost & Found{%
+endblock %} {% block content %}
+
+<section class="messages-section">
+  <div class="container">
+    <!-- HEADER -->
+    <div class="section-heading messages-heading">
+      <p class="eyebrow">MESSAGING</p>
+      <h1>💬 Conversation</h1>
+      <p>Chat with {{ other_user.name }} regarding your approved claim.</p>
+    </div>
+
+    <!-- CLAIM INFORMATION -->
+    <div class="message-claim-info">
+      <div class="claim-info-item">
+        <span class="claim-info-icon">📦</span>
+        <div>
+          <span class="claim-info-label">Item</span>
+          <strong>{{ found_item.name }}</strong>
+        </div>
+      </div>
+
+      <div class="claim-info-item">
+        <span class="claim-info-icon">🏷️</span>
+        <div>
+          <span class="claim-info-label">Category</span>
+          <strong>{{ found_item.category }}</strong>
+        </div>
+      </div>
+
+      <div class="claim-info-item">
+        <span class="claim-info-icon">📍</span>
+        <div>
+          <span class="claim-info-label">Location</span>
+          <strong>{{ found_item.location }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT CARD -->
+    <div class="chat-card">
+      <!-- CHAT HEADER -->
+      <div class="chat-header">
+        <div class="chat-user-avatar">{{ other_user.name[0] | upper }}</div>
+
+        <div class="chat-user-info">
+          <strong>{{ other_user.name }}</strong>
+          <span>{{ other_user.email }}</span>
+        </div>
+
+        <div class="chat-status">
+          <span id="status-dot" class="status-dot"></span>
+          <span id="chat-status-text">Connecting...</span>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div id="chat-box" class="chat-box">
+        {% if conversation %} {% for message in conversation %} {% if
+        message.sender_id == session["user_id"] %}
+
+        <!-- MY MESSAGE -->
+        <div class="message-row message-row-sent">
+          <div class="message-bubble message-bubble-sent">
+            <div class="message-text">{{ message.message }}</div>
+
+            <div class="message-time message-time-sent">
+              🕒 {{ message.created_at | ist }}
+            </div>
+          </div>
+        </div>
+
+        {% else %}
+
+        <!-- OTHER USER MESSAGE -->
+        <div class="message-row message-row-received">
+          <div class="message-bubble message-bubble-received">
+            <div class="message-sender">{{ other_user.name }}</div>
+
+            <div class="message-text">{{ message.message }}</div>
+
+            <div class="message-time message-time-received">
+              🕒 {{ message.created_at | ist }}
+            </div>
+          </div>
+        </div>
+
+        {% endif %} {% endfor %} {% else %}
+
+        <!-- EMPTY CHAT -->
+        <div id="empty-chat" class="chat-empty-state">
+          <div class="chat-empty-icon">💬</div>
+
+          <h3>No messages yet</h3>
+
+          <p>Start the conversation about your item return.</p>
+        </div>
+
+        {% endif %}
+      </div>
+
+      <!-- MESSAGE FORM -->
+      <div class="message-form-wrapper">
+        <form id="message-form" class="message-form">
+          <div class="message-input-wrapper">
+            <textarea
+              id="message-input"
+              name="message"
+              rows="2"
+              placeholder="Type your message..."
+              maxlength="1000"
+              autocomplete="off"
+              required
+            ></textarea>
+
+            <div class="message-input-footer">
+              <span id="character-count"> 0 / 1000 </span>
+
+              <span> Enter to send · Shift + Enter for new line </span>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            id="send-message-btn"
+            class="btn btn-primary message-send-btn"
+          >
+            <span>💬</span>
+            <span>Send</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- BACK BUTTONS -->
+    <div class="message-back-buttons">
+      <a
+        href="{{ url_for('contact_found_person', claim_id=claim.id) }}"
+        class="btn btn-secondary"
+      >
+        ← Contact Details
+      </a>
+
+      <a href="{{ url_for('my_reports') }}" class="btn btn-secondary">
+        My Reports
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     SOCKET.IO CLIENT
+========================================================== -->
+
+<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    /* =====================================================
+       ELEMENTS
+    ====================================================== */
+
+    const chatBox = document.getElementById("chat-box");
+    const messageInput = document.getElementById("message-input");
+    const messageForm = document.getElementById("message-form");
+    const sendButton = document.getElementById("send-message-btn");
+    const characterCount = document.getElementById("character-count");
+
+    const statusText = document.getElementById("chat-status-text");
+
+
+    /* =====================================================
+       CLAIM ID
+       Backend ko batayega ki kaunsi conversation hai.
+    ====================================================== */
+
+    const claimId = {{ claim.id }};
+
+
+    /* =====================================================
+       CURRENT USER ID
+       Message ko left/right decide karne ke liye.
+    ====================================================== */
+
+    const currentUserId = {{ session["user_id"] }};
+
+
+    /* =====================================================
+       SOCKET.IO CONNECTION
+    ====================================================== */
+
+    const socket = io();
+
+
+    /* =====================================================
+       SOCKET CONNECTED
+    ====================================================== */
+
+    socket.on("connect", function () {
+
+      console.log("Socket.IO connected");
+
+      if (statusText) {
+        statusText.textContent = "Live chat";
+      }
+
+
+      /* =================================================
+         JOIN CLAIM ROOM
+
+         Example:
+         claim_5
+
+         Is room mein sirf is claim ke
+         dono users honge.
+      ================================================== */
+
+      socket.emit("join_chat", {
+        claim_id: claimId
+      });
+
+    });
+
+
+    /* =====================================================
+       CHAT JOINED
+    ====================================================== */
+
+    socket.on("chat_joined", function (data) {
+
+      console.log(data.message);
+
+      if (statusText) {
+        statusText.textContent = "Live chat";
+      }
+
+    });
+
+
+    /* =====================================================
+       SOCKET DISCONNECTED
+    ====================================================== */
+
+    socket.on("disconnect", function () {
+
+      console.log("Socket.IO disconnected");
+
+      if (statusText) {
+        statusText.textContent = "Disconnected";
+      }
+
+    });
+
+
+    /* =====================================================
+       AUTO SCROLL
+    ====================================================== */
+
+    function scrollToBottom() {
+
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+    }
+
+
+    scrollToBottom();
+
+
+    /* =====================================================
+       CHARACTER COUNT
+    ====================================================== */
+
+    function updateCharacterCount() {
+
+      if (!messageInput || !characterCount) {
+        return;
+      }
+
+      const length = messageInput.value.length;
+
+      characterCount.textContent =
+        length + " / 1000";
+
+    }
+
+
+    if (messageInput) {
+
+      messageInput.addEventListener(
+        "input",
+        updateCharacterCount
+      );
+
+      updateCharacterCount();
+
+    }
+
+
+    /* =====================================================
+       CREATE MESSAGE HTML
+
+       Server se new message aane par
+       ye function message bubble banayega.
+    ====================================================== */
+
+    function addMessage(data) {
+
+      if (!chatBox) {
+        return;
+      }
+
+
+      /* =================================================
+         REMOVE EMPTY MESSAGE
+      ================================================== */
+
+      const emptyChat =
+        document.getElementById("empty-chat");
+
+      if (emptyChat) {
+        emptyChat.remove();
+      }
+
+
+      /* =================================================
+         CHECK SENDER
+      ================================================== */
+
+      const isMyMessage =
+        Number(data.sender_id) === Number(currentUserId);
+
+
+      /* =================================================
+         CREATE ROW
+      ================================================== */
+
+      const messageRow =
+        document.createElement("div");
+
+
+      if (isMyMessage) {
+
+        messageRow.className =
+          "message-row message-row-sent";
+
+      } else {
+
+        messageRow.className =
+          "message-row message-row-received";
+
+      }
+
+
+      /* =================================================
+         CREATE BUBBLE
+      ================================================== */
+
+      const bubble =
+        document.createElement("div");
+
+
+      if (isMyMessage) {
+
+        bubble.className =
+          "message-bubble message-bubble-sent";
+
+      } else {
+
+        bubble.className =
+          "message-bubble message-bubble-received";
+
+      }
+
+
+      /* =================================================
+         SENDER NAME
+         Sirf received message ke liye.
+      ================================================== */
+
+      if (!isMyMessage) {
+
+        const sender =
+          document.createElement("div");
+
+        sender.className =
+          "message-sender";
+
+        sender.textContent =
+          data.sender_name;
+
+        bubble.appendChild(sender);
+
+      }
+
+
+      /* =================================================
+         MESSAGE TEXT
+      ================================================== */
+
+      const messageText =
+        document.createElement("div");
+
+      messageText.className =
+        "message-text";
+
+      /*
+         textContent use kar rahe hain.
+
+         Reason:
+         User ke message mein HTML/JS execute
+         nahi hoga.
+      */
+
+      messageText.textContent =
+        data.message;
+
+      bubble.appendChild(messageText);
+
+
+      /* =================================================
+         TIME
+      ================================================== */
+
+      const messageTime =
+        document.createElement("div");
+
+
+      if (isMyMessage) {
+
+        messageTime.className =
+          "message-time message-time-sent";
+
+      } else {
+
+        messageTime.className =
+          "message-time message-time-received";
+
+      }
+
+
+      messageTime.textContent =
+        "🕒 " + data.created_at;
+
+
+      bubble.appendChild(messageTime);
+
+
+      /* =================================================
+         ADD TO CHAT
+      ================================================== */
+
+      messageRow.appendChild(bubble);
+
+      chatBox.appendChild(messageRow);
+
+
+      /* =================================================
+         SCROLL TO NEW MESSAGE
+      ================================================== */
+
+      scrollToBottom();
+
+    }
+
+
+    /* =====================================================
+       RECEIVE NEW MESSAGE
+
+       app.py:
+       emit("new_message", ...)
+
+       Yahan receive hoga.
+    ====================================================== */
+
+    socket.on("new_message", function (data) {
+
+      console.log("New message:", data);
+
+      addMessage(data);
+
+    });
+
+
+    /* =====================================================
+       SEND MESSAGE
+    ====================================================== */
+
+    if (messageForm) {
+
+      messageForm.addEventListener(
+        "submit",
+        function (event) {
+
+          event.preventDefault();
+
+
+          const message =
+            messageInput.value.trim();
+
+
+          /* =============================================
+             EMPTY MESSAGE CHECK
+          ============================================== */
+
+          if (!message) {
+
+            messageInput.focus();
+
+            return;
+
+          }
+
+
+          /* =============================================
+             MAX LENGTH CHECK
+          ============================================== */
+
+          if (message.length > 1000) {
+
+            alert(
+              "Message cannot exceed 1000 characters."
+            );
+
+            return;
+
+          }
+
+
+          /* =============================================
+             DISABLE BUTTON
+          ============================================== */
+
+          if (sendButton) {
+
+            sendButton.disabled = true;
+
+            sendButton.innerHTML =
+              "<span>⏳</span><span>Sending...</span>";
+
+          }
+
+
+          /* =============================================
+             SEND THROUGH SOCKET.IO
+
+             Backend:
+             handle_send_message()
+          ============================================== */
+
+          socket.emit("send_message", {
+
+            claim_id: claimId,
+
+            message: message
+
+          });
+
+
+          /* =============================================
+             CLEAR INPUT
+          ============================================== */
+
+          messageInput.value = "";
+
+          updateCharacterCount();
+
+
+          /* =============================================
+             ENABLE BUTTON
+          ============================================== */
+
+          if (sendButton) {
+
+            sendButton.disabled = false;
+
+            sendButton.innerHTML =
+              "<span>💬</span><span>Send</span>";
+
+          }
+
+
+          messageInput.focus();
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       ENTER TO SEND
+
+       Enter = Send
+       Shift + Enter = New Line
+    ====================================================== */
+
+    if (messageInput) {
+
+      messageInput.addEventListener(
+        "keydown",
+        function (event) {
+
+          if (
+            event.key === "Enter" &&
+            !event.shiftKey
+          ) {
+
+            event.preventDefault();
+
+
+            if (
+              messageInput.value.trim() !== ""
+            ) {
+
+              messageForm.requestSubmit();
+
+            }
+
+          }
+
+        }
+      );
+
+    }
+
+  });
+</script>
+
+{% endblock %}

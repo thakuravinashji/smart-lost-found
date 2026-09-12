@@ -1,0 +1,115 @@
+{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
+content %}
+
+<div class="dashboard-container">
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div>
+      <h1>Welcome, {{ user.name }} 👋</h1>
+
+      <p>Here's an overview of your Smart Lost & Found activity.</p>
+    </div>
+
+    <a href="{{ url_for('profile') }}" class="profile-btn"> View Profile </a>
+  </div>
+
+  <!-- STATISTICS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>Total Reports</h3>
+      <div class="stat-number">{{ total_reports }}</div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Lost Reports</h3>
+      <div class="stat-number">{{ lost_reports }}</div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Found Reports</h3>
+      <div class="stat-number">{{ found_reports }}</div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Pending Claims</h3>
+      <div class="stat-number">{{ pending_claims }}</div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Approved Claims</h3>
+      <div class="stat-number">{{ approved_claims }}</div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section">
+    <h2>Quick Actions</h2>
+
+    <div class="quick-actions">
+      <a href="{{ url_for('report_lost') }}"> Report Lost Item </a>
+
+      <a href="{{ url_for('report_found') }}"> Report Found Item </a>
+
+      <a href="{{ url_for('my_reports') }}"> My Reports </a>
+
+      <a href="{{ url_for('notifications') }}"> Notifications </a>
+    </div>
+  </div>
+
+  <!-- RECENT REPORTS -->
+  <div class="section">
+    <h2>Recent Reports</h2>
+
+    {% if recent_reports %}
+
+    <div class="reports-list">
+      {% for item in recent_reports %}
+
+      <div class="report-card">
+        <div>
+          <h3>{{ item.name }}</h3>
+
+          <p>{{ item.category }}</p>
+
+          <p>{{ item.location }}</p>
+        </div>
+
+        <span> {{ item.item_type }} </span>
+      </div>
+
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <p>You haven't reported any items yet.</p>
+
+    {% endif %}
+  </div>
+
+  <!-- RECENT NOTIFICATIONS -->
+  <div class="section">
+    <h2>Recent Notifications</h2>
+
+    {% if recent_notifications %}
+
+    <div class="notifications-list">
+      {% for notification in recent_notifications %}
+
+      <div class="notification-card">
+        <p>{{ notification.message }}</p>
+        <small>{{ notification.created_at|ist }}</small>
+      </div>
+
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <p>No notifications yet.</p>
+
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

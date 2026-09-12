@@ -1,0 +1,349 @@
+{% extends "base.html" %} {% block title %}Home - Smart Lost & Found{% endblock
+%} {% block content %}
+
+<!-- =====================================================
+     HERO SECTION
+===================================================== -->
+
+<section class="hero">
+  <div class="container hero-content">
+    <div class="hero-text">
+      <p class="eyebrow">SMART LOST & FOUND</p>
+
+      <h1>
+        Lost Something?
+        <span>Let's Help You Find It.</span>
+      </h1>
+
+      <p class="hero-description">
+        Report lost or found items and let our smart system help connect them
+        with the right people.
+      </p>
+
+      <div class="hero-buttons">
+        <!-- REPORT LOST -->
+
+        <a
+          href="{{ url_for('report_lost') }}"
+          class="btn btn-primary btn-large"
+        >
+          🔍 Report Lost Item
+        </a>
+
+        <!-- REPORT FOUND -->
+
+        <a
+          href="{{ url_for('report_found') }}"
+          class="btn btn-primary btn-large"
+        >
+          📦 Report Found Item
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     SEARCH SECTION
+===================================================== -->
+
+<section class="search-section">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">FIND AN ITEM</p>
+
+      <h2>Search Lost & Found Items</h2>
+
+      <p>Search for an item by name, description, category or location.</p>
+    </div>
+
+    <!-- SEARCH FORM -->
+
+    <form class="search-form" action="{{ url_for('search') }}" method="GET">
+      <!-- KEYWORD SEARCH -->
+
+      <div class="search-input">
+        <span>🔍</span>
+
+        <input
+          type="text"
+          name="q"
+          placeholder="Search for an item..."
+          aria-label="Search for an item"
+        />
+      </div>
+
+      <!-- CATEGORY -->
+
+      <select name="category" aria-label="Select category">
+        <option value="">All Categories</option>
+
+        <option value="Electronics">Electronics</option>
+
+        <option value="Documents">Documents</option>
+
+        <option value="Wallet">Wallet</option>
+
+        <option value="Keys">Keys</option>
+
+        <option value="Bag">Bag</option>
+
+        <option value="Other">Other</option>
+      </select>
+
+      <!-- SEARCH BUTTON -->
+
+      <button type="submit" class="btn btn-primary">🔍 Search</button>
+    </form>
+  </div>
+</section>
+
+<!-- =====================================================
+     FEATURES SECTION
+===================================================== -->
+
+<section class="features">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">FEATURES</p>
+
+      <h2>How Smart Lost & Found Helps</h2>
+
+      <p>Simple tools that make finding lost belongings easier.</p>
+    </div>
+
+    <div class="feature-grid">
+      <!-- FEATURE 1 -->
+
+      <div class="card">
+        <div class="help-image">
+          <img
+            src="{{ url_for('static', filename='images/search.jpg') }}"
+            alt="Searching for a lost item"
+            loading="lazy"
+          />
+        </div>
+
+        <div class="card-content">
+          <h3>Easy Search</h3>
+
+          <p>
+            Quickly search and filter lost and found items by name, category and
+            location.
+          </p>
+        </div>
+      </div>
+
+      <!-- FEATURE 2 -->
+
+      <div class="card">
+        <div class="help-image">
+          <img
+            src="{{ url_for('static', filename='images/report.jpg') }}"
+            alt="Reporting a lost or found item"
+            loading="lazy"
+          />
+        </div>
+
+        <div class="card-content">
+          <h3>Smart Matching</h3>
+
+          <p>
+            Find possible matches between lost and found reports using item
+            details.
+          </p>
+        </div>
+      </div>
+
+      <!-- FEATURE 3 -->
+
+      <div class="card">
+        <div class="help-image">
+          <img
+            src="{{ url_for('static', filename='images/found.jpg') }}"
+            alt="Matching a lost item with its owner"
+            loading="lazy"
+          />
+        </div>
+
+        <div class="card-content">
+          <h3>Secure Claims</h3>
+
+          <p>Submit claims safely and track the recovery process.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     RECENT ITEMS SECTION
+===================================================== -->
+
+<section class="recent-items" id="recent-items">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">RECENT REPORTS</p>
+
+      <h2>Recently Reported Items</h2>
+
+      <p>Take a look at recently reported lost and found items.</p>
+    </div>
+
+    <div class="item-grid">
+      <!-- IF ITEMS EXIST -->
+
+      {% if recent_items %} {% for item in recent_items %}
+
+      <!-- ITEM CARD -->
+
+      <article class="item-card">
+        <!-- ITEM IMAGE -->
+
+        <div class="item-image">
+          {% if item.image %}
+
+          <img
+            src="{{ url_for(
+                                        'static',
+                                        filename='uploads/' + item.image
+                                    ) }}"
+            alt="{{ item.name }}"
+            loading="lazy"
+          />
+
+          {% else %}
+
+          <div class="no-image" aria-label="No image available">📦</div>
+
+          {% endif %}
+        </div>
+
+        <!-- ITEM DETAILS -->
+
+        <div class="item-details">
+          <!-- STATUS -->
+
+          {% if item.item_type == "Lost" %}
+
+          <span class="status-badge status-lost"> Lost </span>
+
+          {% else %}
+
+          <span class="status-badge status-found"> Found </span>
+
+          {% endif %}
+
+          <!-- ITEM NAME -->
+
+          <h3>{{ item.name }}</h3>
+
+          <!-- DESCRIPTION -->
+
+          <p>{{ item.description }}</p>
+
+          <!-- CATEGORY -->
+
+          <span class="item-location"> 🏷️ {{ item.category }} </span>
+
+          <!-- LOCATION -->
+
+          <span class="item-location"> 📍 {{ item.location }} </span>
+
+          <!-- DATE -->
+
+          <span class="item-location"> 📅 {{ item.date }} </span>
+        </div>
+      </article>
+
+      {% endfor %}
+
+      <!-- NO ITEMS -->
+
+      {% else %}
+
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+
+        <h3>No Items Yet</h3>
+
+        <p>No lost or found items have been reported yet.</p>
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     HOW IT WORKS
+===================================================== -->
+
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">SIMPLE PROCESS</p>
+
+      <h2>How It Works</h2>
+
+      <p>Finding or returning a lost item is simple with Smart Lost & Found.</p>
+    </div>
+
+    <div class="steps-grid">
+      <!-- STEP 1 -->
+
+      <div class="step-card">
+        <div class="step-number">1</div>
+
+        <div class="step-content">
+          <h3>Report</h3>
+
+          <p>
+            Report a lost or found item with its details, location and image.
+          </p>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+
+        <div class="step-content">
+          <h3>Search & Match</h3>
+
+          <p>
+            Search reported items and find possible matches based on item
+            details.
+          </p>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+
+        <div class="step-content">
+          <h3>Claim</h3>
+
+          <p>Submit a claim when you find an item that belongs to you.</p>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+
+      <div class="step-card">
+        <div class="step-number">4</div>
+
+        <div class="step-content">
+          <h3>Recover</h3>
+
+          <p>Connect with the finder and safely recover your lost item.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

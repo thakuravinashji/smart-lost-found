@@ -1,0 +1,291 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}Smart Lost & Found{% endblock %}</title>
+
+    <!-- Google Font -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Main CSS -->
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
+    {% block head %}{% endblock %}
+  </head>
+
+  <body>
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
+
+    <header class="navbar">
+      <div class="container navbar-content">
+        <!-- LOGO -->
+
+        <a href="{{ url_for('home') }}" class="logo">
+          <span class="logo-icon">🔎</span>
+
+          <span>Smart Lost & Found</span>
+        </a>
+
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-label="Open navigation"
+          aria-expanded="false"
+          aria-controls="site-navigation"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <!-- NAVIGATION -->
+
+        <nav class="nav-links" id="site-navigation">
+          <a href="{{ url_for('home') }}"> Home </a>
+
+          <a href="{{ url_for('home') }}#recent-items"> Browse Items </a>
+
+          <a href="{{ url_for('home') }}#how-it-works"> How It Works </a>
+        </nav>
+
+        <!-- NAV ACTIONS -->
+
+        <div class="nav-actions">
+          {% if session.get("user_id") %}
+
+          <!-- USER -->
+
+          <span class="welcome-user"> 👤 {{ session.get("user_name") }} </span>
+
+          <!-- DASHBOARD -->
+
+          <a
+            href="{{ url_for('dashboard') }}"
+            class="btn btn-secondary btn-small"
+          >
+            Dashboard
+          </a>
+
+          <!-- MY REPORTS -->
+
+          <a
+            href="{{ url_for('my_reports') }}"
+            class="btn btn-secondary btn-small"
+          >
+            My Reports
+          </a>
+
+          <!-- NOTIFICATIONS -->
+
+          <a
+            href="{{ url_for('notifications') }}"
+            class="btn btn-secondary btn-small"
+            id="notificationButton"
+          >
+            🔔 Notifications
+
+            <span id="notificationCount">
+              {% if unread_notification_count > 0 %} ({{
+              unread_notification_count }}) {% endif %}
+            </span>
+          </a>
+
+          <!-- LOGOUT -->
+
+          <a href="{{ url_for('logout') }}" class="btn btn-primary btn-small">
+            Logout
+          </a>
+
+          {% else %}
+
+          <!-- LOGIN -->
+
+          <a href="{{ url_for('login') }}" class="btn btn-secondary btn-small">
+            Login
+          </a>
+
+          <!-- REGISTER -->
+
+          <a href="{{ url_for('register') }}" class="btn btn-primary btn-small">
+            Register
+          </a>
+
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main>{% block content %} {% endblock %}</main>
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="footer">
+      <div class="container footer-content">
+        <p>© 2026 Smart Lost & Found</p>
+
+        <p>Helping people find what they lost.</p>
+      </div>
+    </footer>
+
+    <!-- =====================================================
+         SOCKET.IO CLIENT
+    ====================================================== -->
+
+    <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+
+    <!-- =====================================================
+         MAIN JAVASCRIPT
+    ====================================================== -->
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- =====================================================
+         LIVE NOTIFICATION COUNT
+    ====================================================== -->
+
+    {% if session.get("user_id") %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        /*
+         * =====================================================
+         * CONNECT TO SOCKET.IO
+         * =====================================================
+         */
+
+        const notificationSocket = io();
+
+        /*
+         * =====================================================
+         * NOTIFICATION COUNT ELEMENT
+         * =====================================================
+         */
+
+        const notificationCount = document.getElementById("notificationCount");
+
+        /*
+         * =====================================================
+         * SOCKET CONNECTION
+         * =====================================================
+         */
+
+        notificationSocket.on("connect", function () {
+          console.log("Notification Socket Connected");
+        });
+
+        /*
+         * =====================================================
+         * LIVE NOTIFICATION COUNT
+         * =====================================================
+         */
+
+        notificationSocket.on("notification_count", function (data) {
+          if (!notificationCount) {
+            return;
+          }
+
+          const count = Number(data.count || 0);
+
+          /*
+           * COUNT GREATER THAN ZERO
+           */
+
+          if (count > 0) {
+            notificationCount.textContent = " (" + count + ")";
+
+            notificationCount.style.display = "inline";
+          } else {
+            /*
+             * COUNT ZERO
+             */
+            notificationCount.textContent = "";
+
+            notificationCount.style.display = "none";
+          }
+        });
+
+        /*
+         * =====================================================
+         * SOCKET ERROR
+         * =====================================================
+         */
+
+        notificationSocket.on("connect_error", function (error) {
+          console.log("Notification Socket Error:", error);
+        });
+      });
+    </script>
+
+    {% endif %}
+
+    <!-- =====================================================
+         BACK TO TOP BUTTON
+    ====================================================== -->
+
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+      <span>↑</span>
+    </button>
+
+    <!-- =====================================================
+         BACK TO TOP JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const backToTop = document.getElementById("backToTop");
+
+        /*
+         * =====================================================
+         * SHOW BUTTON AFTER SCROLLING
+         * =====================================================
+         */
+
+        window.addEventListener("scroll", function () {
+          if (window.scrollY > 300) {
+            backToTop.classList.add("show");
+          } else {
+            backToTop.classList.remove("show");
+          }
+        });
+
+        /*
+         * =====================================================
+         * SCROLL TO TOP
+         * =====================================================
+         */
+
+        backToTop.addEventListener("click", function () {
+          window.scrollTo({
+            top: 0,
+
+            behavior: "smooth",
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
